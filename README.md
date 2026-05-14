@@ -1,6 +1,6 @@
 # Glossary Compliance Checker
 
-A Python tool that verifies translations against an approved glossary. It scans bilingual documents (Excel, SDLXLIFF) and flags segments where glossary terms are missing, mistranslated, or inconsistent — helping translators and reviewers maintain terminology consistency.
+A Python tool that verifies translations against an approved glossary. It scans bilingual documents (Excel, SDLXLIFF) and flags segments where glossary terms are missing.
 
 ## Features
 
