@@ -1,0 +1,24 @@
+image: python:3.12
+
+stages:
+  - test
+  - lint
+
+before_script:
+  - pip install --upgrade pip
+  - pip install -r requirements.txt
+  - pip install pytest ruff
+
+test:
+  stage: test
+  script:
+    - pytest --tb=short
+  coverage: '/^TOTAL\s+\d+\s+\d+\s+(\d+)%/'
+  artifacts:
+    reports:
+      junit: report.xml
+
+lint:
+  stage: lint
+  script:
+    - ruff check glossary_checker/ tests/

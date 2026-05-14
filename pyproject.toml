@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "glossary_checker"
+version = "1.0.0"
+description = "Check translations for compliance with a glossary of approved terms"
+readme = "README.md"
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.0.0",
+    "openpyxl>=3.1.0",
+    "rapidfuzz>=3.0.0",
+    "lxml>=4.9.0",
+]
+
+[project.urls]
+Repository = "https://gitlab.com/Aitorek/glossary-checker"
+
+[project.scripts]
+glossary-checker = "glossary_checker.gui:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
