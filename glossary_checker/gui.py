@@ -155,7 +155,7 @@ class GlossaryCheckerGUI:
         
         # Add convert button for translation files
         if card_id == 'text':
-        tk.Button(inner, text="Convert to Excel", command=self._convert_to_excel,
+            tk.Button(inner, text="Convert to Excel", command=self._convert_to_excel,
                  bg=self.colors['bg'], fg=self.colors['primary'],
                  font=('Segoe UI', 8), padx=10, pady=2,
                  cursor='hand2', relief=tk.RAISED, bd=1).pack(anchor='w', pady=(5, 0))
