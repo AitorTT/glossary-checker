@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: glossary-checker
+    runtime: python
+    repo: https://github.com/AitorTT/glossary-checker
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn glossary_checker.web:app
