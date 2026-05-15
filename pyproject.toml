@@ -1,6 +1,6 @@
 [build-system]
 requires = ["setuptools>=68"]
-build-backend = "setuptools.backends._legacy:_Backend"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "glossary_checker"
@@ -20,11 +20,18 @@ dependencies = [
     "lxml>=4.9.0",
 ]
 
+[project.optional-dependencies]
+web = ["Flask>=3.0"]
+dev = ["pytest>=7.0"]
+
 [project.urls]
 Repository = "https://gitlab.com/Aitorek/glossary-checker"
 
 [project.scripts]
 glossary-checker = "glossary_checker.gui:main"
+
+[project.gui-scripts]
+glossary-checker-web = "glossary_checker.web:app"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

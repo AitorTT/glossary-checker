@@ -2,7 +2,7 @@
 from pathlib import Path
 from typing import List
 import pandas as pd
-from .parsers import parse_sdlxliff
+from .parsers import parse_sdlxliff, parse_mqxlz
 
 
 def export_to_excel(missing_terms: List[dict], output_path: Path) -> Path:
@@ -104,6 +104,28 @@ def convert_sdlxliff_to_xlsx(sdlxliff_path: Path, output_path: Path = None) -> P
         output_path = sdlxliff_path.with_suffix('.xlsx')
     
     segments = parse_sdlxliff(sdlxliff_path)
+    
+    df = pd.DataFrame(segments, columns=['segment_id', 'source', 'target'])
+    df.to_excel(output_path, index=False, sheet_name='Translation')
+    
+    return output_path
+
+
+def convert_mqxlz_to_xlsx(mqxlz_path: Path, output_path: Path = None) -> Path:
+    """
+    Convert MemoQ .mqxlz file to aligned Excel file.
+    
+    Args:
+        mqxlz_path: Path to .mqxlz file
+        output_path: Optional output path (defaults to same name with .xlsx)
+    
+    Returns:
+        Path to the created Excel file
+    """
+    if output_path is None:
+        output_path = mqxlz_path.with_suffix('.xlsx')
+    
+    segments = parse_mqxlz(mqxlz_path)
     
     df = pd.DataFrame(segments, columns=['segment_id', 'source', 'target'])
     df.to_excel(output_path, index=False, sheet_name='Translation')

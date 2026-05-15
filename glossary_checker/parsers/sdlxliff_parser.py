@@ -9,7 +9,7 @@ def parse_sdlxliff(path: Path) -> List[Tuple[int, str, str]]:
     Parse SDLXLIFF file (Trados Studio format).
     
     Extracts source text from <seg-source> and target text from <target>.
-    Both are expected to contain <mrk> elements with segment text.
+    Handles multiple <mrk> segments within a single <trans-unit>.
     
     Returns:
         List of (segment_id, source_text, target_text) tuples
@@ -22,45 +22,49 @@ def parse_sdlxliff(path: Path) -> List[Tuple[int, str, str]]:
     xliff_ns = ns_map.get(None) if None in ns_map else 'urn:oasis:names:tc:xliff:document:1.2'
     
     segments = []
+    seg_counter = 0
     
     # Find all trans-unit elements
     trans_units = root.xpath('//ns:trans-unit', namespaces={'ns': xliff_ns})
     
     if not trans_units:
-        # Fallback without namespace
         trans_units = root.xpath('//trans-unit')
         ns_aware = False
     else:
         ns_aware = True
     
-    for idx, tu in enumerate(trans_units):
+    for tu in trans_units:
         try:
-            # Extract source using filters
             if ns_aware:
-                source_elements = tu.xpath('.//ns:seg-source//ns:mrk', namespaces={'ns': xliff_ns})
-                target_elements = tu.xpath('.//ns:target//ns:mrk', namespaces={'ns': xliff_ns})
-                
-                # Fallback if filters don't match
-                if not source_elements:
-                    source_elements = tu.xpath('.//ns:source', namespaces={'ns': xliff_ns})
-                if not target_elements:
-                    target_elements = tu.xpath('.//ns:target', namespaces={'ns': xliff_ns})
+                source_mrks = tu.xpath('.//ns:seg-source//ns:mrk', namespaces={'ns': xliff_ns})
+                target_mrks = tu.xpath('.//ns:target//ns:mrk', namespaces={'ns': xliff_ns})
+                source_fallback = tu.xpath('.//ns:source', namespaces={'ns': xliff_ns})
+                target_fallback = tu.xpath('.//ns:target', namespaces={'ns': xliff_ns})
             else:
-                source_elements = tu.xpath('.//seg-source//mrk')
-                target_elements = tu.xpath('.//target//mrk')
+                source_mrks = tu.xpath('.//seg-source//mrk')
+                target_mrks = tu.xpath('.//target//mrk')
+                source_fallback = tu.xpath('.//source')
+                target_fallback = tu.xpath('.//target')
+            
+            # If there are mrk elements, process each one
+            if source_mrks and target_mrks:
+                # Build mid-to-element maps for pairing
+                source_by_mid = {m.get('mid'): m for m in source_mrks if m.get('mid')}
+                target_by_mid = {m.get('mid'): m for m in target_mrks if m.get('mid')}
                 
-                if not source_elements:
-                    source_elements = tu.xpath('.//source')
-                if not target_elements:
-                    target_elements = tu.xpath('.//target')
-            
-            # Extract text
-            source_text = get_element_text(source_elements[0]) if source_elements else ""
-            target_text = get_element_text(target_elements[0]) if target_elements else ""
-            
-            if source_text and target_text:
-                segments.append((idx, source_text, target_text))
-            
+                for mid in source_by_mid:
+                    source_text = get_element_text(source_by_mid[mid])
+                    target_text = get_element_text(target_by_mid.get(mid))
+                    if source_text:
+                        segments.append((seg_counter, source_text, target_text))
+                        seg_counter += 1
+            elif source_fallback and target_fallback:
+                source_text = get_element_text(source_fallback[0]) if source_fallback else ""
+                target_text = get_element_text(target_fallback[0]) if target_fallback else ""
+                if source_text:
+                    segments.append((seg_counter, source_text, target_text))
+                    seg_counter += 1
+                    
         except Exception:
             continue
     

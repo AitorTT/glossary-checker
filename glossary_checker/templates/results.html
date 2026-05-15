@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% block title %}Results — Glossary Compliance Checker{% endblock %}
+{% block content %}
+<div class="results-header">
+  <div class="stats">
+    <div class="stat {% if stats.total_missing == 0 %}stat-ok{% else %}stat-error{% endif %}">
+      <span class="stat-value">{{ stats.total_missing }}</span>
+      <span class="stat-label">Missing terms</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ stats.segments_affected | length }}</span>
+      <span class="stat-label">Segments affected</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ stats.unique_terms | length }}</span>
+      <span class="stat-label">Unique terms</span>
+    </div>
+  </div>
+
+  {% if stats.most_common_term %}
+  <p class="most-common">Most common: <strong>{{ stats.most_common_term[0] }}</strong> ({{ stats.most_common_term[1] }} times)</p>
+  {% endif %}
+
+  <div class="files-info">
+    <span>Glossary: <strong>{{ glossary_name }}</strong></span>
+    <span>Translation: <strong>{{ translation_name }}</strong></span>
+  </div>
+</div>
+
+{% if results %}
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>Seg</th>
+        <th>English term</th>
+        <th>Expected Spanish</th>
+        <th>English context</th>
+        <th>Spanish context</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in results %}
+      <tr>
+        <td>{{ item.segment_id }}</td>
+        <td><code>{{ item.english_term }}</code></td>
+        <td>{{ item.expected_spanish | join(', ') }}</td>
+        <td class="context">{{ item.english_context }}</td>
+        <td class="context">{{ item.spanish_context }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="no-results">
+  <p>✓ No missing glossary terms found! Perfect compliance.</p>
+</div>
+{% endif %}
+
+<div class="actions">
+  <a href="{{ url_for('index') }}" class="btn-secondary">← Check another file</a>
+  <a href="{{ url_for('export', result_id=result_id, fmt='xlsx') }}" class="btn-primary">📎 Export to Excel</a>
+  <a href="{{ url_for('export', result_id=result_id, fmt='csv') }}" class="btn-secondary">📎 Export to CSV</a>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block title %}Glossary Compliance Checker{% endblock %}
+{% block content %}
+<form action="{{ url_for('check') }}" method="post" enctype="multipart/form-data" class="upload-form">
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">📖</div>
+      <h3>Glossary (Excel)</h3>
+      <p class="card-hint">English terms (col A) → Spanish equivalents (col B)</p>
+      <input type="file" name="glossary" accept=".xlsx,.xls" required>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌐</div>
+      <h3>Translation File</h3>
+      <p class="card-hint">Excel (.xlsx), SDLXLIFF (.sdlxliff), or MemoQ (.mqxlz)</p>
+      <input type="file" name="translation" accept=".xlsx,.xls,.sdlxliff,.mqxlz" required>
+    </div>
+  </div>
+  <button type="submit" class="btn-primary">▶ RUN COMPLIANCE CHECK</button>
+</form>
+
+<hr class="section-divider">
+
+<h2 class="section-title">Convert SDLXLIFF to Excel</h2>
+<form action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data" class="upload-form">
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🔄</div>
+      <h3>SDLXLIFF File</h3>
+      <p class="card-hint">Convert .sdlxliff to aligned .xlsx for easy review</p>
+      <input type="file" name="sdlxliff" accept=".sdlxliff" required>
+    </div>
+  </div>
+  <button type="submit" class="btn-secondary">🔄 Convert to Excel</button>
+</form>
+
+<hr class="section-divider">
+
+<h2 class="section-title">Convert MemoQ (.mqxlz) to Excel</h2>
+<form action="{{ url_for('convert_mqxlz') }}" method="post" enctype="multipart/form-data" class="upload-form">
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🗂️</div>
+      <h3>MemoQ Bilingual Export</h3>
+      <p class="card-hint">Convert .mqxlz to aligned .xlsx for easy review</p>
+      <input type="file" name="mqxlz" accept=".mqxlz" required>
+    </div>
+  </div>
+  <button type="submit" class="btn-secondary">🗂️ Convert to Excel</button>
+</form>
+{% endblock %}

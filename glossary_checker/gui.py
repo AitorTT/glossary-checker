@@ -5,27 +5,20 @@ from pathlib import Path
 import threading
 from .core import GlossaryChecker
 from .exporters import export_to_excel, export_summary_text
+from .config import Config
 
 
 class GlossaryCheckerGUI:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("Glossary Compliance Checker")
-        self.root.geometry("1100x700")
-        self.root.configure(bg='#1e1e2e')
+        self.root.title(Config.GUI_TITLE)
+        self.root.geometry(Config.GUI_GEOMETRY)
+        self.root.configure(bg=Config.GUI_BG_COLOR)
         
         # Store current results for export
         self.current_results = []
         
-        self.colors = {
-            'bg': '#1e1e2e',
-            'surface': '#2d2d3f',
-            'primary': '#89b4fa',
-            'success': '#a6e3a1',
-            'error': '#f38ba8',
-            'text': '#cdd6f4',
-            'text_secondary': '#9399b2',
-        }
+        self.colors = Config.GUI_COLORS
         
         self.glossary_path = None
         self.text_path = None
@@ -34,6 +27,7 @@ class GlossaryCheckerGUI:
         self._apply_styles()
     
     def _apply_styles(self):
+
         style = ttk.Style()
         style.theme_use('clam')
         
@@ -155,19 +149,26 @@ class GlossaryCheckerGUI:
         
         # Add convert button for translation files
         if card_id == 'text':
-            tk.Button(inner, text="Convert to Excel", command=self._convert_to_excel,
+            btns = tk.Frame(inner, bg=self.colors['surface'])
+            btns.pack(anchor='w', pady=(5, 0))
+            tk.Button(btns, text="SDLXLIFF → XLSX", command=self._convert_to_excel,
                  bg=self.colors['bg'], fg=self.colors['primary'],
-                 font=('Segoe UI', 8), padx=10, pady=2,
-                 cursor='hand2', relief=tk.RAISED, bd=1).pack(anchor='w', pady=(5, 0))
+                 font=('Segoe UI', 8), padx=8, pady=2,
+                 cursor='hand2', relief=tk.RAISED, bd=1).pack(side=tk.LEFT, padx=(0, 4))
+            tk.Button(btns, text="MemoQ → XLSX", command=self._convert_mqxlz_to_excel,
+                 bg=self.colors['bg'], fg=self.colors['primary'],
+                 font=('Segoe UI', 8), padx=8, pady=2,
+                 cursor='hand2', relief=tk.RAISED, bd=1).pack(side=tk.LEFT)
     
     def _select_file(self, file_type):
         if file_type == 'glossary':
             filetypes = [("Excel files", "*.xlsx *.xls"), ("All files", "*.*")]
         else:
             filetypes = [
-                ("All supported", "*.xlsx *.xls *.sdlxliff"),
+                ("All supported", "*.xlsx *.xls *.sdlxliff *.mqxlz"),
                 ("Excel files", "*.xlsx *.xls"),
                 ("SDLXLIFF files", "*.sdlxliff"),
+                ("MemoQ files", "*.mqxlz"),
                 ("All files", "*.*")
             ]
         
@@ -208,6 +209,30 @@ class GlossaryCheckerGUI:
             try:
                 from .exporters import convert_sdlxliff_to_xlsx
                 result_path = convert_sdlxliff_to_xlsx(self.text_path, Path(output_path))
+                messagebox.showinfo("Conversion Complete", f"File converted to:\n{result_path}")
+            except Exception as e:
+                messagebox.showerror("Conversion Failed", str(e))
+    
+    def _convert_mqxlz_to_excel(self):
+        """Convert selected .mqxlz file to Excel."""
+        if not self.text_path:
+            messagebox.showwarning("No File", "Please select a translation file first.")
+            return
+        
+        if self.text_path.suffix.lower() != '.mqxlz':
+            messagebox.showinfo("Not MemoQ", "Conversion is only available for .mqxlz files.")
+            return
+        
+        output_path = filedialog.asksaveasfilename(
+            defaultextension=".xlsx",
+            filetypes=[("Excel files", "*.xlsx")],
+            initialfile=self.text_path.stem + "_aligned.xlsx"
+        )
+        
+        if output_path:
+            try:
+                from .exporters import convert_mqxlz_to_xlsx
+                result_path = convert_mqxlz_to_xlsx(self.text_path, Path(output_path))
                 messagebox.showinfo("Conversion Complete", f"File converted to:\n{result_path}")
             except Exception as e:
                 messagebox.showerror("Conversion Failed", str(e))

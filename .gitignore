@@ -24,6 +24,7 @@ Thumbs.db
 # Project data files (sample/test data — too large and unnecessary in repo)
 *.xlsx
 *.sdlxliff
+*.mqxlz
 
 # But keep template/test fixtures if needed
 !tests/fixtures/
