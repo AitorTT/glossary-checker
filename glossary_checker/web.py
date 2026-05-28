@@ -6,14 +6,14 @@ from pathlib import Path
 from flask import Flask, render_template, request, send_file, flash, redirect, url_for, session
 
 from .core import GlossaryChecker
-from .exporters import export_to_excel, export_to_csv, convert_sdlxliff_to_xlsx, convert_mqxlz_to_xlsx
+from .exporters import export_to_excel, export_to_csv, convert_sdlxliff_to_xlsx, convert_mqxlz_to_xlsx, convert_tmx_to_xlsx, convert_sdltm_to_xlsx, convert_xlf_to_xlsx
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", uuid.uuid4().hex)
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB
 
 ALLOWED_GLOSSARY_EXT = {".xlsx", ".xls"}
-ALLOWED_TRANSLATION_EXT = {".xlsx", ".xls", ".sdlxliff", ".mqxlz"}
+ALLOWED_TRANSLATION_EXT = {".xlsx", ".xls", ".sdlxliff", ".mqxlz", ".xlf", ".tmx", ".sdltm"}
 
 _results_cache: dict[str, list[dict]] = {}
 
@@ -41,7 +41,7 @@ def check():
         return redirect(url_for("index"))
 
     if not _ext_ok(translation_file.filename, ALLOWED_TRANSLATION_EXT):
-        flash("Translation file must be Excel or SDLXLIFF.", "error")
+        flash("Translation file must be Excel, SDLXLIFF, XLIFF, TMX, or SDLTM.", "error")
         return redirect(url_for("index"))
 
     tmpdir = Path(tempfile.mkdtemp(prefix="glossary_"))
@@ -69,7 +69,42 @@ def check():
                                translation_name=translation_file.filename)
 
     except Exception as e:
-        flash(f"Error: {e}", "error")
+        flash(f"Conversion error: {e}", "error")
+        return redirect(url_for("index"))
+    finally:
+        import shutil
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+@app.route("/convert_xlf", methods=["POST"])
+def convert_xlf():
+    xlf_file = request.files.get("xlf")
+
+    if not xlf_file:
+        flash("Please select an XLIFF (.xlf) file.", "error")
+        return redirect(url_for("index"))
+
+    if Path(xlf_file.filename).suffix.lower() != ".xlf":
+        flash("File must be an XLIFF (.xlf).", "error")
+        return redirect(url_for("index"))
+
+    tmpdir = Path(tempfile.mkdtemp(prefix="convert_"))
+
+    try:
+        input_path = tmpdir / xlf_file.filename
+        xlf_file.save(input_path)
+
+        output_path = convert_xlf_to_xlsx(input_path)
+        out_name = Path(xlf_file.filename).stem + "_aligned.xlsx"
+
+        return send_file(
+            output_path,
+            as_attachment=True,
+            download_name=out_name,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    except Exception as e:
+        flash(f"Conversion error: {e}", "error")
         return redirect(url_for("index"))
     finally:
         import shutil
@@ -159,6 +194,76 @@ def convert_mqxlz():
 
         output_path = convert_mqxlz_to_xlsx(input_path)
         out_name = Path(mqxlz_file.filename).stem + "_aligned.xlsx"
+
+        return send_file(
+            output_path,
+            as_attachment=True,
+            download_name=out_name,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    except Exception as e:
+        flash(f"Conversion error: {e}", "error")
+        return redirect(url_for("index"))
+    finally:
+        import shutil
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+@app.route("/convert_tmx", methods=["POST"])
+def convert_tmx():
+    tmx_file = request.files.get("tmx")
+
+    if not tmx_file:
+        flash("Please select a TMX (.tmx) file.", "error")
+        return redirect(url_for("index"))
+
+    if Path(tmx_file.filename).suffix.lower() != ".tmx":
+        flash("File must be a TMX export (.tmx).", "error")
+        return redirect(url_for("index"))
+
+    tmpdir = Path(tempfile.mkdtemp(prefix="convert_"))
+
+    try:
+        input_path = tmpdir / tmx_file.filename
+        tmx_file.save(input_path)
+
+        output_path = convert_tmx_to_xlsx(input_path)
+        out_name = Path(tmx_file.filename).stem + "_aligned.xlsx"
+
+        return send_file(
+            output_path,
+            as_attachment=True,
+            download_name=out_name,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    except Exception as e:
+        flash(f"Conversion error: {e}", "error")
+        return redirect(url_for("index"))
+    finally:
+        import shutil
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+@app.route("/convert_sdltm", methods=["POST"])
+def convert_sdltm():
+    sdltm_file = request.files.get("sdltm")
+
+    if not sdltm_file:
+        flash("Please select an SDLTM (.sdltm) file.", "error")
+        return redirect(url_for("index"))
+
+    if Path(sdltm_file.filename).suffix.lower() != ".sdltm":
+        flash("File must be an SDL Trados TM (.sdltm).", "error")
+        return redirect(url_for("index"))
+
+    tmpdir = Path(tempfile.mkdtemp(prefix="convert_"))
+
+    try:
+        input_path = tmpdir / sdltm_file.filename
+        sdltm_file.save(input_path)
+
+        output_path = convert_sdltm_to_xlsx(input_path)
+        out_name = Path(sdltm_file.filename).stem + "_aligned.xlsx"
 
         return send_file(
             output_path,

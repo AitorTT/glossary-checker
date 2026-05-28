@@ -12,8 +12,8 @@
     <div class="card">
       <div class="card-icon">🌐</div>
       <h3>Translation File</h3>
-      <p class="card-hint">Excel (.xlsx), SDLXLIFF (.sdlxliff), or MemoQ (.mqxlz)</p>
-      <input type="file" name="translation" accept=".xlsx,.xls,.sdlxliff,.mqxlz" required>
+      <p class="card-hint">Excel (.xlsx), SDLXLIFF (.sdlxliff), XLIFF (.xlf), TMX (.tmx), SDLTM (.sdltm), or MemoQ (.mqxlz)</p>
+      <input type="file" name="translation" accept=".xlsx,.xls,.sdlxliff,.xlf,.tmx,.sdltm,.mqxlz" required>
     </div>
   </div>
   <button type="submit" class="btn-primary">▶ RUN COMPLIANCE CHECK</button>
@@ -47,5 +47,50 @@
     </div>
   </div>
   <button type="submit" class="btn-secondary">🗂️ Convert to Excel</button>
+</form>
+
+<hr class="section-divider">
+
+<h2 class="section-title">Convert XLIFF (.xlf) to Excel</h2>
+<form action="{{ url_for('convert_xlf') }}" method="post" enctype="multipart/form-data" class="upload-form">
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🔄</div>
+      <h3>XLIFF File</h3>
+      <p class="card-hint">Convert .xlf to aligned .xlsx for easy review</p>
+      <input type="file" name="xlf" accept=".xlf" required>
+    </div>
+  </div>
+  <button type="submit" class="btn-secondary">🔄 Convert to Excel</button>
+</form>
+
+<hr class="section-divider">
+
+<h2 class="section-title">Convert TMX (.tmx) to Excel</h2>
+<form action="{{ url_for('convert_tmx') }}" method="post" enctype="multipart/form-data" class="upload-form">
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🔄</div>
+      <h3>TMX File</h3>
+      <p class="card-hint">Convert .tmx to aligned .xlsx for easy review</p>
+      <input type="file" name="tmx" accept=".tmx" required>
+    </div>
+  </div>
+  <button type="submit" class="btn-secondary">🔄 Convert to Excel</button>
+</form>
+
+<hr class="section-divider">
+
+<h2 class="section-title">Convert SDLTM (.sdltm) to Excel</h2>
+<form action="{{ url_for('convert_sdltm') }}" method="post" enctype="multipart/form-data" class="upload-form">
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🔄</div>
+      <h3>SDLTM File</h3>
+      <p class="card-hint">Convert .sdltm to aligned .xlsx for easy review</p>
+      <input type="file" name="sdltm" accept=".sdltm" required>
+    </div>
+  </div>
+  <button type="submit" class="btn-secondary">🔄 Convert to Excel</button>
 </form>
 {% endblock %}

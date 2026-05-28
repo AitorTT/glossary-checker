@@ -4,6 +4,9 @@ from typing import List, Tuple
 from .excel_parser import parse_excel
 from .sdlxliff_parser import parse_sdlxliff
 from .mqxliff_parser import parse_mqxlz
+from .xlf_parser import parse_xlf
+from .tmx_parser import parse_tmx
+from .sdltm_parser import parse_sdltm
 
 
 def get_parser_for_file(path: Path):
@@ -20,6 +23,9 @@ def get_parser_for_file(path: Path):
         '.xls': parse_excel,
         '.sdlxliff': parse_sdlxliff,
         '.mqxlz': parse_mqxlz,
+        '.xlf': parse_xlf,
+        '.tmx': parse_tmx,
+        '.sdltm': parse_sdltm,
     }
     
     return parsers.get(ext)

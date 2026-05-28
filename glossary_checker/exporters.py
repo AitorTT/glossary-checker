@@ -2,7 +2,7 @@
 from pathlib import Path
 from typing import List
 import pandas as pd
-from .parsers import parse_sdlxliff, parse_mqxlz
+from .parsers import parse_sdlxliff, parse_mqxlz, parse_tmx, parse_sdltm, parse_xlf
 
 
 def export_to_excel(missing_terms: List[dict], output_path: Path) -> Path:
@@ -103,7 +103,7 @@ def convert_sdlxliff_to_xlsx(sdlxliff_path: Path, output_path: Path = None) -> P
     if output_path is None:
         output_path = sdlxliff_path.with_suffix('.xlsx')
     
-    segments = parse_sdlxliff(sdlxliff_path)
+    segments = parse_sdlxliff(sdlxliff_path, preserve_tags=True)
     
     df = pd.DataFrame(segments, columns=['segment_id', 'source', 'target'])
     df.to_excel(output_path, index=False, sheet_name='Translation')
@@ -125,9 +125,75 @@ def convert_mqxlz_to_xlsx(mqxlz_path: Path, output_path: Path = None) -> Path:
     if output_path is None:
         output_path = mqxlz_path.with_suffix('.xlsx')
     
-    segments = parse_mqxlz(mqxlz_path)
+    segments = parse_mqxlz(mqxlz_path, preserve_tags=True)
     
     df = pd.DataFrame(segments, columns=['segment_id', 'source', 'target'])
     df.to_excel(output_path, index=False, sheet_name='Translation')
     
+    return output_path
+
+
+def convert_tmx_to_xlsx(tmx_path: Path, output_path: Path = None) -> Path:
+    """
+    Convert TMX file to aligned Excel file.
+
+    Args:
+        tmx_path: Path to .tmx file
+        output_path: Optional output path (defaults to same name with .xlsx)
+
+    Returns:
+        Path to the created Excel file
+    """
+    if output_path is None:
+        output_path = tmx_path.with_suffix('.xlsx')
+
+    segments = parse_tmx(tmx_path)
+
+    df = pd.DataFrame(segments, columns=['segment_id', 'source', 'target'])
+    df.to_excel(output_path, index=False, sheet_name='Translation')
+
+    return output_path
+
+
+def convert_sdltm_to_xlsx(sdltm_path: Path, output_path: Path = None) -> Path:
+    """
+    Convert SDLTM file to aligned Excel file.
+
+    Args:
+        sdltm_path: Path to .sdltm file
+        output_path: Optional output path (defaults to same name with .xlsx)
+
+    Returns:
+        Path to the created Excel file
+    """
+    if output_path is None:
+        output_path = sdltm_path.with_suffix('.xlsx')
+
+    segments = parse_sdltm(sdltm_path)
+
+    df = pd.DataFrame(segments, columns=['segment_id', 'source', 'target'])
+    df.to_excel(output_path, index=False, sheet_name='Translation')
+
+    return output_path
+
+
+def convert_xlf_to_xlsx(xlf_path: Path, output_path: Path = None) -> Path:
+    """
+    Convert XLIFF .xlf file to aligned Excel file.
+
+    Args:
+        xlf_path: Path to .xlf file
+        output_path: Optional output path (defaults to same name with .xlsx)
+
+    Returns:
+        Path to the created Excel file
+    """
+    if output_path is None:
+        output_path = xlf_path.with_suffix('.xlsx')
+
+    segments = parse_xlf(xlf_path, preserve_tags=True)
+
+    df = pd.DataFrame(segments, columns=['segment_id', 'source', 'target'])
+    df.to_excel(output_path, index=False, sheet_name='Translation')
+
     return output_path

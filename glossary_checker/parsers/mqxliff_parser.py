@@ -6,11 +6,15 @@ from lxml import etree
 from .sdlxliff_parser import get_element_text
 
 
-def parse_mqxlz(path: Path) -> List[Tuple[int, str, str]]:
+def parse_mqxlz(path: Path, preserve_tags: bool = False) -> List[Tuple[int, str, str]]:
     """
     Parse a .mqxlz file (MemoQ export) and extract segments.
     
     The .mqxlz is a zip containing a document.mqxliff (XLIFF 1.2).
+    
+    Args:
+        path: Path to .mqxlz file
+        preserve_tags: If True, preserve inline XML tags as [tag]...[/tag]
     
     Returns:
         List of (segment_id, source_text, target_text) tuples
@@ -29,8 +33,8 @@ def parse_mqxlz(path: Path) -> List[Tuple[int, str, str]]:
             source_elem = tu.find(f'{{{xliff_ns}}}source')
             target_elem = tu.find(f'{{{xliff_ns}}}target')
 
-            source_text = get_element_text(source_elem) if source_elem is not None else ""
-            target_text = get_element_text(target_elem) if target_elem is not None else ""
+            source_text = get_element_text(source_elem, preserve_tags) if source_elem is not None else ""
+            target_text = get_element_text(target_elem, preserve_tags) if target_elem is not None else ""
 
             if source_text:
                 segments.append((idx, source_text, target_text))

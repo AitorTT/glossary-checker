@@ -1,15 +1,20 @@
 """SDLXLIFF file parser for Trados Studio translation files."""
+import html
 from pathlib import Path
 from typing import List, Tuple
 from lxml import etree
 
 
-def parse_sdlxliff(path: Path) -> List[Tuple[int, str, str]]:
+def parse_sdlxliff(path: Path, preserve_tags: bool = False) -> List[Tuple[int, str, str]]:
     """
     Parse SDLXLIFF file (Trados Studio format).
     
     Extracts source text from <seg-source> and target text from <target>.
     Handles multiple <mrk> segments within a single <trans-unit>.
+    
+    Args:
+        path: Path to .sdlxliff file
+        preserve_tags: If True, preserve inline XML tags as [tag]...[/tag]
     
     Returns:
         List of (segment_id, source_text, target_text) tuples
@@ -53,14 +58,14 @@ def parse_sdlxliff(path: Path) -> List[Tuple[int, str, str]]:
                 target_by_mid = {m.get('mid'): m for m in target_mrks if m.get('mid')}
                 
                 for mid in source_by_mid:
-                    source_text = get_element_text(source_by_mid[mid])
-                    target_text = get_element_text(target_by_mid.get(mid))
+                    source_text = get_element_text(source_by_mid[mid], preserve_tags)
+                    target_text = get_element_text(target_by_mid.get(mid), preserve_tags)
                     if source_text:
                         segments.append((seg_counter, source_text, target_text))
                         seg_counter += 1
             elif source_fallback and target_fallback:
-                source_text = get_element_text(source_fallback[0]) if source_fallback else ""
-                target_text = get_element_text(target_fallback[0]) if target_fallback else ""
+                source_text = get_element_text(source_fallback[0], preserve_tags) if source_fallback else ""
+                target_text = get_element_text(target_fallback[0], preserve_tags) if target_fallback else ""
                 if source_text:
                     segments.append((seg_counter, source_text, target_text))
                     seg_counter += 1
@@ -71,32 +76,51 @@ def parse_sdlxliff(path: Path) -> List[Tuple[int, str, str]]:
     return segments
 
 
-def get_element_text(element) -> str:
-    """Extract clean text from an XML element."""
+def get_element_text(element, preserve_tags: bool = False) -> str:
+    """Extract text from an XML element.
+    
+    Args:
+        element: lxml element
+        preserve_tags: If True, preserve inline XML tags as [tag]...[/tag]
+    
+    Returns:
+        Clean text string
+    """
     if element is None:
         return ""
     
-    # Get the text content
-    text_parts = []
+    if preserve_tags:
+        text = _serialize_tags(element)
+    else:
+        text_parts = []
+        if element.text:
+            text_parts.append(element.text)
+        for child in element:
+            if child.text:
+                text_parts.append(child.text)
+            if child.tail:
+                text_parts.append(child.tail)
+        text = ' '.join(text_parts).strip()
     
-    # Get element's own text
-    if element.text:
-        text_parts.append(element.text)
-    
-    # Process child elements (like g, ph, etc.)
-    for child in element:
-        # Recursively get child text if it has content
-        if child.text:
-            text_parts.append(child.text)
-        if child.tail:
-            text_parts.append(child.tail)
-    
-    # Join and clean
-    text = ' '.join(text_parts).strip()
-    
-    # Remove XML entities
-    text = text.replace('&amp;', '&')
-    text = text.replace('&lt;', '<')
-    text = text.replace('&gt;', '>')
+    text = html.unescape(text)
     
     return text
+
+
+def _serialize_tags(element) -> str:
+    """Serialize XML inline tags as [tag]...[/tag] recursively."""
+    parts = []
+    if element.text:
+        parts.append(element.text)
+    for child in element:
+        tag = child.tag.split('}')[-1]
+        attrs = ' '.join(f'{k}="{v}"' for k, v in child.attrib.items())
+        if attrs:
+            parts.append(f'[{tag} {attrs}]')
+        else:
+            parts.append(f'[{tag}]')
+        parts.append(_serialize_tags(child))
+        parts.append(f'[/{tag}]')
+        if child.tail:
+            parts.append(child.tail)
+    return ''.join(parts)

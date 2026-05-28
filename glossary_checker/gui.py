@@ -158,6 +158,14 @@ class GlossaryCheckerGUI:
             tk.Button(btns, text="MemoQ → XLSX", command=self._convert_mqxlz_to_excel,
                  bg=self.colors['bg'], fg=self.colors['primary'],
                  font=('Segoe UI', 8), padx=8, pady=2,
+                 cursor='hand2', relief=tk.RAISED, bd=1).pack(side=tk.LEFT, padx=(0, 4))
+            tk.Button(btns, text="TMX → XLSX", command=self._convert_tmx_to_excel,
+                 bg=self.colors['bg'], fg=self.colors['primary'],
+                 font=('Segoe UI', 8), padx=8, pady=2,
+                 cursor='hand2', relief=tk.RAISED, bd=1).pack(side=tk.LEFT, padx=(0, 4))
+            tk.Button(btns, text="SDLTM → XLSX", command=self._convert_sdltm_to_excel,
+                 bg=self.colors['bg'], fg=self.colors['primary'],
+                 font=('Segoe UI', 8), padx=8, pady=2,
                  cursor='hand2', relief=tk.RAISED, bd=1).pack(side=tk.LEFT)
     
     def _select_file(self, file_type):
@@ -165,10 +173,12 @@ class GlossaryCheckerGUI:
             filetypes = [("Excel files", "*.xlsx *.xls"), ("All files", "*.*")]
         else:
             filetypes = [
-                ("All supported", "*.xlsx *.xls *.sdlxliff *.mqxlz"),
+                ("All supported", "*.xlsx *.xls *.sdlxliff *.mqxlz *.tmx *.sdltm"),
                 ("Excel files", "*.xlsx *.xls"),
                 ("SDLXLIFF files", "*.sdlxliff"),
                 ("MemoQ files", "*.mqxlz"),
+                ("TMX files", "*.tmx"),
+                ("SDLTM files", "*.sdltm"),
                 ("All files", "*.*")
             ]
         
@@ -233,6 +243,78 @@ class GlossaryCheckerGUI:
             try:
                 from .exporters import convert_mqxlz_to_xlsx
                 result_path = convert_mqxlz_to_xlsx(self.text_path, Path(output_path))
+                messagebox.showinfo("Conversion Complete", f"File converted to:\n{result_path}")
+            except Exception as e:
+                messagebox.showerror("Conversion Failed", str(e))
+    
+    def _convert_tmx_to_excel(self):
+        """Convert selected .tmx file to Excel."""
+        if not self.text_path:
+            messagebox.showwarning("No File", "Please select a translation file first.")
+            return
+        
+        if self.text_path.suffix.lower() != '.tmx':
+            messagebox.showinfo("Not TMX", "Conversion is only available for .tmx files.")
+            return
+        
+        output_path = filedialog.asksaveasfilename(
+            defaultextension=".xlsx",
+            filetypes=[("Excel files", "*.xlsx")],
+            initialfile=self.text_path.stem + "_aligned.xlsx"
+        )
+        
+        if output_path:
+            try:
+                from .exporters import convert_tmx_to_xlsx
+                result_path = convert_tmx_to_xlsx(self.text_path, Path(output_path))
+                messagebox.showinfo("Conversion Complete", f"File converted to:\n{result_path}")
+            except Exception as e:
+                messagebox.showerror("Conversion Failed", str(e))
+    
+    def _convert_sdltm_to_excel(self):
+        """Convert selected .sdltm file to Excel."""
+        if not self.text_path:
+            messagebox.showwarning("No File", "Please select a translation file first.")
+            return
+        
+        if self.text_path.suffix.lower() != '.sdltm':
+            messagebox.showinfo("Not SDLTM", "Conversion is only available for .sdltm files.")
+            return
+        
+        output_path = filedialog.asksaveasfilename(
+            defaultextension=".xlsx",
+            filetypes=[("Excel files", "*.xlsx")],
+            initialfile=self.text_path.stem + "_aligned.xlsx"
+        )
+        
+        if output_path:
+            try:
+                from .exporters import convert_sdltm_to_xlsx
+                result_path = convert_sdltm_to_xlsx(self.text_path, Path(output_path))
+                messagebox.showinfo("Conversion Complete", f"File converted to:\n{result_path}")
+            except Exception as e:
+                messagebox.showerror("Conversion Failed", str(e))
+    
+    def _convert_xlf_to_excel(self):
+        """Convert selected .xlf file to Excel."""
+        if not self.text_path:
+            messagebox.showwarning("No File", "Please select a translation file first.")
+            return
+        
+        if self.text_path.suffix.lower() != '.xlf':
+            messagebox.showinfo("Not XLIFF", "Conversion is only available for .xlf files.")
+            return
+        
+        output_path = filedialog.asksaveasfilename(
+            defaultextension=".xlsx",
+            filetypes=[("Excel files", "*.xlsx")],
+            initialfile=self.text_path.stem + "_aligned.xlsx"
+        )
+        
+        if output_path:
+            try:
+                from .exporters import convert_xlf_to_xlsx
+                result_path = convert_xlf_to_xlsx(self.text_path, Path(output_path))
                 messagebox.showinfo("Conversion Complete", f"File converted to:\n{result_path}")
             except Exception as e:
                 messagebox.showerror("Conversion Failed", str(e))
