@@ -65,14 +65,20 @@ header h1 { color: #89b4fa; font-size: 1.75rem; }
 .layout-split {
   display: flex;
   gap: 1.5rem;
-  align-items: flex-start;
+  align-items: stretch;
 }
 .split-col {
   flex: 1;
+  display: flex;
   min-width: 0;
 }
+.split-col form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
 .split-col .card { margin-bottom: 1rem; }
-.split-col form { display: flex; flex-direction: column; }
+.split-col .btn-full { margin-top: auto; }
 .btn-full { display: block; width: 100%; text-align: center; padding: 0.75rem; font-size: 1rem; }
 
 /* Custom file input */
@@ -91,7 +97,7 @@ header h1 { color: #89b4fa; font-size: 1.75rem; }
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: opacity 0.15s;
+  transition: 0.15s;
 }
 .file-label:hover { opacity: 0.85; }
 .file-name {
@@ -100,8 +106,24 @@ header h1 { color: #89b4fa; font-size: 1.75rem; }
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
 }
-.card input[type="file"]:not([hidden]) { display: block; width: 100%; padding: 0.4rem; font-size: 0.85rem; color: #cdd6f4; background: #1e1e2e; border: 1px solid #45475a; border-radius: 4px; }
+
+/* Drop zones */
+.drop-zone {
+  transition: border-color 0.2s, background 0.2s;
+  border: 2px dashed #45475a;
+}
+.drop-zone.drag-over {
+  border-color: #89b4fa;
+  background: #313244;
+}
+
+/* Convert card accent */
+.card-convert {
+  flex: 1;
+  border: 2px dashed #89b4fa;
+}
 
 /* Results page */
 .results-header { margin-bottom: 1.5rem; }

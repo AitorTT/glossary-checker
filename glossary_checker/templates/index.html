@@ -5,17 +5,25 @@
 
   <div class="split-col">
     <form action="{{ url_for('check') }}" method="post" enctype="multipart/form-data">
-      <div class="card">
+      <div class="card drop-zone" id="drop-translation">
         <div class="card-icon">🌐</div>
         <h3>Translation File</h3>
         <p class="card-hint">SDLXLIFF, XLIFF, TMX, SDLTM, MemoQ, or Excel</p>
-        <input type="file" name="translation" accept=".xlsx,.xls,.sdlxliff,.xlf,.tmx,.sdltm,.mqxlz" required>
+        <div class="file-input-wrapper">
+          <input type="file" id="file-translation" name="translation" accept=".xlsx,.xls,.sdlxliff,.xlf,.tmx,.sdltm,.mqxlz" required hidden>
+          <label for="file-translation" class="file-label">Select file</label>
+          <span class="file-name" id="file-translation-name">Drop or click to select</span>
+        </div>
       </div>
-      <div class="card">
+      <div class="card drop-zone" id="drop-glossary">
         <div class="card-icon">📖</div>
         <h3>Glossary (Excel)</h3>
         <p class="card-hint">English terms (col A) → Spanish equivalents (col B)</p>
-        <input type="file" name="glossary" accept=".xlsx,.xls" required>
+        <div class="file-input-wrapper">
+          <input type="file" id="file-glossary" name="glossary" accept=".xlsx,.xls" required hidden>
+          <label for="file-glossary" class="file-label">Select file</label>
+          <span class="file-name" id="file-glossary-name">Drop or click to select</span>
+        </div>
       </div>
       <button type="submit" class="btn-primary btn-full">▶ RUN COMPLIANCE CHECK</button>
     </form>
@@ -23,14 +31,14 @@
 
   <div class="split-col">
     <form action="{{ url_for('convert_file') }}" method="post" enctype="multipart/form-data">
-      <div class="card">
+      <div class="card card-convert drop-zone" id="drop-convert">
         <div class="card-icon">🔄</div>
         <h3>Convert to Excel</h3>
         <p class="card-hint">.sdlxliff · .mqxlz · .xlf · .tmx · .sdltm</p>
         <div class="file-input-wrapper">
-          <input type="file" id="convert-file" name="file" accept=".sdlxliff,.mqxlz,.xlf,.tmx,.sdltm" required hidden>
-          <label for="convert-file" class="file-label">Select file</label>
-          <span class="file-name" id="convert-file-name">No file selected</span>
+          <input type="file" id="file-convert" name="file" accept=".sdlxliff,.mqxlz,.xlf,.tmx,.sdltm" required hidden>
+          <label for="file-convert" class="file-label">Select file</label>
+          <span class="file-name" id="file-convert-name">Drop or click to select</span>
         </div>
       </div>
       <button type="submit" class="btn-secondary btn-full">🔄 Convert to Excel</button>
@@ -40,9 +48,35 @@
 </div>
 
 <script>
-document.getElementById('convert-file').addEventListener('change', function() {
-  var name = this.files && this.files[0] ? this.files[0].name : 'No file selected';
-  document.getElementById('convert-file-name').textContent = name;
-});
+function setupDrop(inputId, nameId, zoneId) {
+  var input = document.getElementById(inputId);
+  var nameEl = document.getElementById(nameId);
+  var zone = document.getElementById(zoneId);
+
+  function updateName() {
+    nameEl.textContent = input.files && input.files[0] ? input.files[0].name : 'Drop or click to select';
+  }
+
+  input.addEventListener('change', updateName);
+
+  zone.addEventListener('dragenter', function(e) { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', function(e) { zone.classList.remove('drag-over'); });
+  zone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    var files = e.dataTransfer.files;
+    if (files.length > 0) {
+      var dt = new DataTransfer();
+      dt.items.add(files[0]);
+      input.files = dt.files;
+      updateName();
+    }
+  });
+}
+
+setupDrop('file-translation', 'file-translation-name', 'drop-translation');
+setupDrop('file-glossary', 'file-glossary-name', 'drop-glossary');
+setupDrop('file-convert', 'file-convert-name', 'drop-convert');
 </script>
 {% endblock %}
