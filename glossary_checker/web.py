@@ -3,10 +3,18 @@ import os
 import uuid
 import tempfile
 from pathlib import Path
-from flask import Flask, render_template, request, send_file, flash, redirect, url_for, session
+from flask import Flask, render_template, request, send_file, flash, redirect, url_for
 
 from .core import GlossaryChecker
 from .exporters import export_to_excel, export_to_csv, convert_sdlxliff_to_xlsx, convert_mqxlz_to_xlsx, convert_tmx_to_xlsx, convert_sdltm_to_xlsx, convert_xlf_to_xlsx
+
+CONVERTERS = {
+    ".sdlxliff": convert_sdlxliff_to_xlsx,
+    ".mqxlz": convert_mqxlz_to_xlsx,
+    ".xlf": convert_xlf_to_xlsx,
+    ".tmx": convert_tmx_to_xlsx,
+    ".sdltm": convert_sdltm_to_xlsx,
+}
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", uuid.uuid4().hex)
@@ -25,6 +33,44 @@ def _ext_ok(filename: str, allowed: set) -> bool:
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/convert_file", methods=["POST"])
+def convert_file():
+    uploaded = request.files.get("file")
+
+    if not uploaded:
+        flash("Please select a file to convert.", "error")
+        return redirect(url_for("index"))
+
+    ext = Path(uploaded.filename).suffix.lower()
+    converter = CONVERTERS.get(ext)
+
+    if not converter:
+        flash(f"Unsupported file format: {ext}", "error")
+        return redirect(url_for("index"))
+
+    tmpdir = Path(tempfile.mkdtemp(prefix="convert_"))
+
+    try:
+        input_path = tmpdir / uploaded.filename
+        uploaded.save(input_path)
+
+        output_path = converter(input_path)
+        out_name = Path(uploaded.filename).stem + "_aligned.xlsx"
+
+        return send_file(
+            output_path,
+            as_attachment=True,
+            download_name=out_name,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    except Exception as e:
+        flash(f"Conversion error: {e}", "error")
+        return redirect(url_for("index"))
+    finally:
+        import shutil
+        shutil.rmtree(tmpdir, ignore_errors=True)
 
 
 @app.route("/check", methods=["POST"])

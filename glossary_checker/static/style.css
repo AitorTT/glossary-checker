@@ -41,17 +41,6 @@ header h1 { color: #89b4fa; font-size: 1.75rem; }
 .card-icon { font-size: 2rem; margin-bottom: 0.5rem; }
 .card h3 { color: #cdd6f4; font-size: 1rem; margin-bottom: 0.25rem; }
 .card-hint { color: #9399b2; font-size: 0.8rem; margin-bottom: 1rem; }
-.card input[type="file"] {
-  display: block;
-  width: 100%;
-  padding: 0.4rem;
-  font-size: 0.85rem;
-  color: #cdd6f4;
-  background: #1e1e2e;
-  border: 1px solid #45475a;
-  border-radius: 4px;
-}
-
 .btn-primary, .btn-secondary {
   display: inline-block;
   padding: 0.6rem 1.5rem;
@@ -73,8 +62,46 @@ header h1 { color: #89b4fa; font-size: 1.75rem; }
   color: #cdd6f4;
 }
 
-.upload-form { text-align: center; }
-.upload-form .btn-primary { margin-top: 0.5rem; }
+.layout-split {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+.split-col {
+  flex: 1;
+  min-width: 0;
+}
+.split-col .card { margin-bottom: 1rem; }
+.split-col form { display: flex; flex-direction: column; }
+.btn-full { display: block; width: 100%; text-align: center; padding: 0.75rem; font-size: 1rem; }
+
+/* Custom file input */
+.file-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.file-label {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #89b4fa;
+  color: #1e1e2e;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+.file-label:hover { opacity: 0.85; }
+.file-name {
+  color: #9399b2;
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card input[type="file"]:not([hidden]) { display: block; width: 100%; padding: 0.4rem; font-size: 0.85rem; color: #cdd6f4; background: #1e1e2e; border: 1px solid #45475a; border-radius: 4px; }
 
 /* Results page */
 .results-header { margin-bottom: 1.5rem; }
