@@ -3,6 +3,11 @@ __pycache__/
 *.pyc
 *.pyo
 
+# Packaging
+*.egg-info/
+build/
+dist/
+
 # Test cache
 .pytest_cache/
 htmlcov/
@@ -24,6 +29,7 @@ Thumbs.db
 # Project data files (sample/test data — too large and unnecessary in repo)
 *.xlsx
 *.sdlxliff
+*.sdlppx
 *.mqxlz
 
 # But keep template/test fixtures if needed

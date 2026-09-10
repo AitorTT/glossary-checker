@@ -6,10 +6,11 @@ from pathlib import Path
 from flask import Flask, render_template, request, send_file, flash, redirect, url_for
 
 from .core import GlossaryChecker
-from .exporters import export_to_excel, export_to_csv, convert_sdlxliff_to_xlsx, convert_mqxlz_to_xlsx, convert_tmx_to_xlsx, convert_sdltm_to_xlsx, convert_xlf_to_xlsx
+from .exporters import export_to_excel, export_to_csv, convert_sdlxliff_to_xlsx, convert_sdlppx_to_xlsx, convert_mqxlz_to_xlsx, convert_tmx_to_xlsx, convert_sdltm_to_xlsx, convert_xlf_to_xlsx
 
 CONVERTERS = {
     ".sdlxliff": convert_sdlxliff_to_xlsx,
+    ".sdlppx": convert_sdlppx_to_xlsx,
     ".mqxlz": convert_mqxlz_to_xlsx,
     ".xlf": convert_xlf_to_xlsx,
     ".tmx": convert_tmx_to_xlsx,
@@ -21,7 +22,7 @@ app.secret_key = os.environ.get("SECRET_KEY", uuid.uuid4().hex)
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB
 
 ALLOWED_GLOSSARY_EXT = {".xlsx", ".xls"}
-ALLOWED_TRANSLATION_EXT = {".xlsx", ".xls", ".sdlxliff", ".mqxlz", ".xlf", ".tmx", ".sdltm"}
+ALLOWED_TRANSLATION_EXT = {".xlsx", ".xls", ".sdlxliff", ".sdlppx", ".mqxlz", ".xlf", ".tmx", ".sdltm"}
 
 _results_cache: dict[str, list[dict]] = {}
 
@@ -87,7 +88,7 @@ def check():
         return redirect(url_for("index"))
 
     if not _ext_ok(translation_file.filename, ALLOWED_TRANSLATION_EXT):
-        flash("Translation file must be Excel, SDLXLIFF, XLIFF, TMX, or SDLTM.", "error")
+        flash("Translation file must be Excel, SDLXLIFF, Trados package (.sdlppx), XLIFF, TMX, or SDLTM.", "error")
         return redirect(url_for("index"))
 
     tmpdir = Path(tempfile.mkdtemp(prefix="glossary_"))

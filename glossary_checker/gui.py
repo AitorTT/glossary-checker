@@ -155,27 +155,59 @@ class GlossaryCheckerGUI:
                  bg=self.colors['bg'], fg=self.colors['primary'],
                  font=('Segoe UI', 8), padx=8, pady=2,
                  cursor='hand2', relief=tk.RAISED, bd=1).pack(side=tk.LEFT, padx=(0, 4))
+            tk.Button(btns, text="SDLPPX → XLSX", command=self._convert_sdlppx_to_excel,
+                 bg=self.colors['bg'], fg=self.colors['primary'],
+                 font=('Segoe UI', 8), padx=8, pady=2,
+                 cursor='hand2', relief=tk.RAISED, bd=1).pack(side=tk.LEFT, padx=(0, 4))
             tk.Button(btns, text="MemoQ → XLSX", command=self._convert_mqxlz_to_excel,
                  bg=self.colors['bg'], fg=self.colors['primary'],
                  font=('Segoe UI', 8), padx=8, pady=2,
-                 cursor='hand2', relief=tk.RAISED, bd=1).pack(side=tk.LEFT, padx=(0, 4))
-            tk.Button(btns, text="TMX → XLSX", command=self._convert_tmx_to_excel,
+                 cursor='hand2', relief=tk.RAISED, bd=1).pack(side=tk.LEFT)
+
+            btns2 = tk.Frame(inner, bg=self.colors['surface'])
+            btns2.pack(anchor='w', pady=(4, 0))
+            tk.Button(btns2, text="TMX → XLSX", command=self._convert_tmx_to_excel,
                  bg=self.colors['bg'], fg=self.colors['primary'],
                  font=('Segoe UI', 8), padx=8, pady=2,
                  cursor='hand2', relief=tk.RAISED, bd=1).pack(side=tk.LEFT, padx=(0, 4))
-            tk.Button(btns, text="SDLTM → XLSX", command=self._convert_sdltm_to_excel,
+            tk.Button(btns2, text="SDLTM → XLSX", command=self._convert_sdltm_to_excel,
                  bg=self.colors['bg'], fg=self.colors['primary'],
                  font=('Segoe UI', 8), padx=8, pady=2,
                  cursor='hand2', relief=tk.RAISED, bd=1).pack(side=tk.LEFT)
+    
+    def _convert_sdlppx_to_excel(self):
+        """Convert selected .sdlppx file to Excel."""
+        if not self.text_path:
+            messagebox.showwarning("No File", "Please select a translation file first.")
+            return
+        
+        if self.text_path.suffix.lower() != '.sdlppx':
+            messagebox.showinfo("Not a Trados package", "Conversion is only available for .sdlppx files.")
+            return
+        
+        output_path = filedialog.asksaveasfilename(
+            defaultextension=".xlsx",
+            filetypes=[("Excel files", "*.xlsx")],
+            initialfile=self.text_path.stem + "_aligned.xlsx"
+        )
+        
+        if output_path:
+            try:
+                from .exporters import convert_sdlppx_to_xlsx
+                result_path = convert_sdlppx_to_xlsx(self.text_path, Path(output_path))
+                messagebox.showinfo("Conversion Complete", f"File converted to:\n{result_path}")
+            except Exception as e:
+                messagebox.showerror("Conversion Failed", str(e))
     
     def _select_file(self, file_type):
         if file_type == 'glossary':
             filetypes = [("Excel files", "*.xlsx *.xls"), ("All files", "*.*")]
         else:
             filetypes = [
-                ("All supported", "*.xlsx *.xls *.sdlxliff *.mqxlz *.tmx *.sdltm"),
+                ("All supported", "*.xlsx *.xls *.sdlxliff *.sdlppx *.mqxlz *.tmx *.sdltm"),
                 ("Excel files", "*.xlsx *.xls"),
                 ("SDLXLIFF files", "*.sdlxliff"),
+                ("Trados packages", "*.sdlppx"),
                 ("MemoQ files", "*.mqxlz"),
                 ("TMX files", "*.tmx"),
                 ("SDLTM files", "*.sdltm"),

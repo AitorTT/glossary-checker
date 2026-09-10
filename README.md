@@ -1,12 +1,12 @@
 # Glossary Compliance Checker
 
-A Python tool that verifies translations against an approved glossary. It scans bilingual documents (Excel, SDLXLIFF, MemoQ) and flags segments where glossary terms are missing, mistranslated, or inconsistent — helping translators and reviewers maintain terminology consistency.
+A Python tool that verifies translations against an approved glossary. It scans bilingual documents (Excel, SDLXLIFF, Trados packages, MemoQ, XLIFF, TMX, SDLTM) and flags segments where glossary terms are missing, mistranslated, or inconsistent — helping translators and reviewers maintain terminology consistency.
 
 ## Features
 
 - **Glossary-driven checking** — Load an English→Spanish glossary from Excel
-- **Multi-format support** — Scans Excel (`.xlsx`), SDLXLIFF (`.sdlxliff`), and MemoQ (`.mqxlz`) translation files
-- **File conversion** — Convert SDLXLIFF or MemoQ exports to aligned Excel for easy review
+- **Multi-format support** — Scans Excel (`.xlsx`), SDLXLIFF (`.sdlxliff`), Trados packages (`.sdlppx`), MemoQ (`.mqxlz`), XLIFF (`.xlf`), TMX (`.tmx`), and SDLTM (`.sdltm`) translation files
+- **File conversion** — Convert SDLXLIFF, Trados packages, or MemoQ exports to aligned Excel for easy review
 - **Smart matching** — Whole-word matching + fuzzy matching (via `rapidfuzz`) catches typos and accent variations
 - **Graphical interface** — Built with Tkinter, dark-themed, no web server needed
 - **Web interface** — Flask-based web UI for browser-based usage
@@ -47,7 +47,7 @@ gunicorn glossary_checker.web:app
 ## Usage
 
 1. **Select Glossary** — Browse for an Excel file with English terms in column A and Spanish equivalents in column B
-2. **Select Translation File** — Choose a translation file (Excel, SDLXLIFF, or MemoQ) to check
+2. **Select Translation File** — Choose a translation file (Excel, SDLXLIFF, Trados package `.sdlppx`, MemoQ, XLIFF, TMX, or SDLTM) to check
 3. **Run Check** — Click "Run Compliance Check" to scan all segments
 4. **Review & Export** — View missing terms in the results panel, export to Excel or CSV
 
@@ -78,6 +78,7 @@ glossary_checker/
 │   ├── parsers/             # File format parsers
 │   │   ├── excel_parser.py
 │   │   ├── sdlxliff_parser.py
+│   │   ├── sdlppx_parser.py
 │   │   └── mqxliff_parser.py
 │   ├── templates/           # Flask HTML templates
 │   │   ├── layout.html

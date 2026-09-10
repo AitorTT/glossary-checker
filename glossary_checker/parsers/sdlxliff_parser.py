@@ -19,8 +19,22 @@ def parse_sdlxliff(path: Path, preserve_tags: bool = False) -> List[Tuple[int, s
     Returns:
         List of (segment_id, source_text, target_text) tuples
     """
-    tree = etree.parse(str(path))
-    root = tree.getroot()
+    with open(path, 'rb') as f:
+        return parse_sdlxliff_bytes(f.read(), preserve_tags)
+
+
+def parse_sdlxliff_bytes(content: bytes, preserve_tags: bool = False) -> List[Tuple[int, str, str]]:
+    """
+    Parse SDLXLIFF content already loaded in memory.
+
+    Args:
+        content: Raw SDLXLIFF XML bytes
+        preserve_tags: If True, preserve inline XML tags as [tag]...[/tag]
+
+    Returns:
+        List of (segment_id, source_text, target_text) tuples
+    """
+    root = etree.fromstring(content)
     
     # Find namespace
     ns_map = root.nsmap
